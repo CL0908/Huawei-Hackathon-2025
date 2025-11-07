@@ -39,3 +39,58 @@ Luméa aims to make distributed energy accessible, transparent, and trustworthy 
 - Delivers a **generation forecast** and **confidence index** directly into the blockchain for transparent sharing.  
 
 **Formula (simplified):**
+P_out = (G_poa * η_module * (1 - γΔT)) * inverter_efficiency
+
+where *G_poa* = plane-of-array irradiance (from pvlib) and *γ* is temperature coefficient.
+
+---
+
+## 🔒 Q-ORCA Quantum Blockchain  
+
+**Goal:** trustable, efficient communication between multiple energy nodes.  
+
+- Built with **Orthogonal Recursive Covert Algorithm (ORCA)** on top of a **Huawei BCS-compatible blockchain**.  
+- Uses **Hadamard-matrix encoding** to send *one encrypted broadcast to many recipients*.  
+- Reduces encryption/signing operations from `O(N)` → `O(1)`, saving ~80–90 % network bandwidth compared to traditional broadcast.  
+- Integrated **Quantum Random Number Generator (QRNG)** & **QKD-style session keys** to ensure entropy integrity and tamper resistance.  
+- Every energy transaction carries an *AI forecast + quantum trust token*, verified across the network.  
+
+**Benefits**
+- Efficient & scalable P2P communication for solar communities.  
+- Hidden (covert) communication channel → security without revealing sender identity.  
+- Lightweight enough for edge IoT gateways (home inverters, microgrids).
+
+---
+
+## 🧠 Theory Behind  
+
+| Layer | Concept | Advantage |
+|-------|----------|-----------|
+| **AI Forecast** | pvlib + LightGBM on Huawei Cloud | Robust, explainable solar prediction |
+| **Blockchain** | Q-ORCA orthogonal encoding + quantum entropy | Secure, one-to-many covert data flow |
+| **Integration** | Smart contracts + ORCA mapping | Automated energy pricing, carbon credit tokenization |
+
+**Mathematical Core:**  
+Hadamard encoding \( H_n = [H_{n/2}, H_{n/2}; H_{n/2}, -H_{n/2}] \) enables lossless decoding by each node using its assigned vector.  
+
+---
+
+## 🧩 Architecture  
+
+```text
+[Frontend Web / Mobile App]
+      |
+    [API Gateway (APIG)]
+      |
+   +----------------------------+
+   |  ServiceStage Microservices |
+   |  - Forecast Engine (pvlib + AI) |
+   |  - Trading Engine (ORCA-Blockchain) |
+   |  - Solar Map (Google API) |
+   +----------------------------+
+      |
+    [Huawei Cloud BCS + Redis + DMS]
+      |
+   [Quantum Encryption Layer (QRNG + ORCA)]
+
+
