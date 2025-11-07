@@ -1,8 +1,8 @@
 # Huawei-Hackathon-2025
 
 **QuIEP — Quantum-Intelligent Energy Platform**  
-ORCA Quantum Blockchain for Hyper-Secure P2P Solar Energy Trading
-QuIEP (Quiet) Energy Trading, Quantum Control
+- ORCA Quantum Blockchain for Hyper-Secure P2P Solar Energy Trading
+- QuIEP (Quiet) Energy Trading, Quantum Control
 
 **Track:** Society, Sustainability & Digital Transformation  
 
@@ -10,9 +10,9 @@ QuIEP (Quiet) Energy Trading, Quantum Control
   <img src="QuIEP.jpeg" alt="QuIEP Logo" width="130" />
   <h3>AI Forecast  + Q-ORCA Blockchain  + Solar Map API </h3>
   <p>Empowering communities to forecast, trade, and trust clean solar energy — built for the Huawei Tech4City Hackathon 2025.</p>
-  <a href="About the project">About the project</a> •
+  <a href="#about-the-project">About the project</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#Why Huawei ">Why Huawei </a> •
+  <a href="#why-huawei ">Why Huawei </a> •
   <a href="#references">References</a>
 </div>
 
