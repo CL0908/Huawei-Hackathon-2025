@@ -10,9 +10,9 @@ QuIEP (Quiet) Energy Trading, Quantum Control
   <img src="QuIEP.jpeg" alt="QuIEP Logo" width="130" />
   <h3>AI Forecast  + Q-ORCA Blockchain  + Solar Map API </h3>
   <p>Empowering communities to forecast, trade, and trust clean solar energy — built for the Huawei Tech4City Hackathon 2025.</p>
-  <a href="#getting-started">Getting Started</a> •
+  <a href="About the project">About the project</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#features">Features</a> •
+  <a href="#Why Huawei ">Why Huawei </a> •
   <a href="#references">References</a>
 </div>
 
@@ -124,7 +124,7 @@ pip install -r requirements.txt
 ```
 
 ## References
--Huawei Digital Power White Paper 2025
--Wang et al., 2025: “From one-one to one-many: ORCA enables scalable and revocable group covert communication on blockchain.”
--DNV Energy Transition Outlook 2025: P2P Trading & Smart Microgrids.
--pvlib Documentation
+- Huawei Digital Power White Paper 2025
+- Wang et al., 2025: “From one-one to one-many: ORCA enables scalable and revocable group covert communication on blockchain.”
+- DNV Energy Transition Outlook 2025: P2P Trading & Smart Microgrids.
+- pvlib Documentation
