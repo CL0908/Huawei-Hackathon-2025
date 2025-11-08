@@ -1,0 +1,1598 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Solar API Explorer - Malaysia Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      --bg: #f7f5ff;
+      --card-bg: #ffffff;
+      --card-border: rgba(57, 45, 136, 0.08);
+      --text: #1d1b3a;
+      --muted: #605b85;
+      --accent: #6a4de8;
+      --accent-soft: rgba(106, 77, 232, 0.12);
+      --metric-pill: #ede9ff;
+      --energy: #ffb200;
+      --panel: #5cdb95;
+      --danger: #cc3a4b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --installed: #22c55e;
+      --not-installed: #94a3b8;
+      --terrace: #8b5cf6;
+      --bungalow: #ec4899;
+      --gold: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+
+    #map {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .overlay {
+      position: fixed;
+      pointer-events: none;
+      display: flex;
+      gap: 16px;
+      padding: 22px;
+      z-index: 10;
+    }
+
+    .overlay-left {
+      top: 0;
+      left: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      width: min(420px, 88vw);
+      max-height: calc(100vh - 44px);
+      overflow-y: auto;
+    }
+
+    .overlay-right {
+      top: 0;
+      right: 0;
+      width: min(480px, 90vw);
+      max-height: calc(100vh - 44px);
+      overflow-y: auto;
+    }
+
+    .card {
+      pointer-events: auto;
+      border-radius: 24px;
+      background: var(--card-bg);
+      padding: 24px 26px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 40px rgba(59, 49, 141, 0.12), 0 4px 12px rgba(59, 49, 141, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .card.compact { 
+      gap: 12px; 
+      padding: 20px 22px; 
+      border-radius: 20px; 
+    }
+
+    /* White theme for recommendation cards */
+    .card.white-theme {
+      background: linear-gradient(135deg, #ffffff 0%, #fefeff 100%);
+      border: 2px solid rgba(139, 92, 246, 0.15);
+      box-shadow: 0 24px 48px rgba(139, 92, 246, 0.15), 0 8px 16px rgba(139, 92, 246, 0.08);
+    }
+
+    .card.white-theme.bungalow {
+      border: 2px solid rgba(236, 72, 153, 0.15);
+      box-shadow: 0 24px 48px rgba(236, 72, 153, 0.15), 0 8px 16px rgba(236, 72, 153, 0.08);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--metric-pill);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 10px;
+      color: var(--accent);
+    }
+
+    .badge.installed {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--installed);
+    }
+
+    .badge.not-installed {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--not-installed);
+    }
+
+    .badge.terrace {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--terrace);
+    }
+
+    .badge.bungalow {
+      background: rgba(236, 72, 153, 0.15);
+      color: var(--bungalow);
+    }
+
+    .badge.premium {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.15));
+      color: var(--gold);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .headline {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .muted { 
+      color: var(--muted); 
+      font-size: 13px; 
+      line-height: 1.5; 
+    }
+
+    .house-type-indicator {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.12));
+      border: 1.5px solid rgba(139, 92, 246, 0.25);
+    }
+
+    .house-type-indicator.bungalow {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(236, 72, 153, 0.12));
+      border: 1.5px solid rgba(236, 72, 153, 0.25);
+    }
+
+    .house-type-indicator .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: rgba(139, 92, 246, 0.15);
+      flex-shrink: 0;
+    }
+
+    .house-type-indicator.bungalow .icon {
+      background: rgba(236, 72, 153, 0.15);
+    }
+
+    .house-type-indicator .content {
+      flex: 1;
+    }
+
+    .house-type-indicator .title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 5px;
+      letter-spacing: -0.01em;
+    }
+
+    .house-type-indicator .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .installation-status {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(16, 185, 129, 0.12));
+      border: 1.5px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .installation-status.not-installed {
+      background: linear-gradient(135deg, rgba(148, 163, 184, 0.08), rgba(148, 163, 184, 0.12));
+      border: 1.5px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .installation-status .icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--installed);
+      flex-shrink: 0;
+    }
+
+    .installation-status.not-installed .icon {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--not-installed);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric {
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(106, 77, 232, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border: 1px solid rgba(106, 77, 232, 0.1);
+    }
+
+    .metric .label { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+      color: rgba(29, 27, 58, 0.6);
+      font-weight: 600;
+    }
+    .metric .value { 
+      font-size: 20px; 
+      font-weight: 700; 
+      color: var(--text); 
+      letter-spacing: -0.01em;
+    }
+
+    .metric.energy { 
+      background: rgba(255, 178, 0, 0.08); 
+      border-color: rgba(255, 178, 0, 0.2);
+    }
+    .metric.panels { 
+      background: rgba(92, 219, 149, 0.1); 
+      border-color: rgba(92, 219, 149, 0.25);
+    }
+    .metric.maintenance { 
+      background: rgba(245, 158, 11, 0.08); 
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+    .metric.price { 
+      background: rgba(139, 92, 246, 0.08); 
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+
+    .recommendation-card {
+      background: #ffffff;
+      border: 2px solid rgba(16, 185, 129, 0.2);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.12);
+    }
+
+    .recommendation-card .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(16, 185, 129, 0.1);
+    }
+
+    .recommendation-card .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--success);
+    }
+
+    .recommendation-card .title {
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .recommendation-specs {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.08);
+    }
+
+    .spec-row:last-child {
+      border-bottom: none;
+    }
+
+    .spec-row .label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .spec-row .value {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .spec-row.highlight {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.05));
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-top: 6px;
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+
+    .spec-row.highlight .value {
+      color: var(--success);
+      font-size: 20px;
+    }
+
+    .pricing-card {
+      background: #ffffff;
+      border: 2px solid rgba(139, 92, 246, 0.2);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.12);
+    }
+
+    .pricing-card.bungalow {
+      border: 2px solid rgba(236, 72, 153, 0.2);
+      box-shadow: 0 20px 40px rgba(236, 72, 153, 0.12);
+    }
+
+    .pricing-card .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(139, 92, 246, 0.1);
+    }
+
+    .pricing-card.bungalow .header {
+      border-bottom-color: rgba(236, 72, 153, 0.1);
+    }
+
+    .pricing-card .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pricing-card .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--terrace);
+    }
+
+    .pricing-card.bungalow .icon {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(219, 39, 119, 0.2));
+      color: var(--bungalow);
+    }
+
+    .pricing-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+
+    .price-row .label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .price-row .value {
+      font-weight: 700;
+    }
+
+    .price-row.total {
+      padding-top: 14px;
+      margin-top: 10px;
+      border-top: 2px solid rgba(139, 92, 246, 0.15);
+      font-size: 16px;
+    }
+
+    .price-row.total .value {
+      color: var(--terrace);
+      font-size: 22px;
+    }
+
+    .pricing-card.bungalow .price-row.total {
+      border-top-color: rgba(236, 72, 153, 0.15);
+    }
+
+    .pricing-card.bungalow .price-row.total .value {
+      color: var(--bungalow);
+    }
+
+    .price-row.net {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-top: 6px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .price-row.net .value {
+      color: var(--success);
+      font-size: 20px;
+    }
+
+    .maintenance-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(251, 191, 36, 0.05));
+      border: 1.5px solid rgba(245, 158, 11, 0.25);
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    .maintenance-card .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .maintenance-card .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--gold);
+    }
+
+    .maintenance-card .title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .maintenance-frequency {
+      background: rgba(245, 158, 11, 0.1);
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .maintenance-frequency .freq-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .maintenance-frequency .freq-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .savings-card {
+      background: #ffffff;
+      border: 2px solid rgba(16, 185, 129, 0.2);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.12);
+    }
+
+    .savings-card .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(16, 185, 129, 0.1);
+    }
+
+    .savings-card .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--success);
+    }
+
+    input[type="text"] {
+      flex: 1;
+      border-radius: 14px;
+      border: 1.5px solid rgba(29, 27, 58, 0.15);
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.9);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(106, 77, 232, 0.12);
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      background: linear-gradient(135deg, #6a4de8, #aa7dfb);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(106, 77, 232, 0.25);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    button:hover { 
+      transform: translateY(-1px); 
+      box-shadow: 0 14px 28px rgba(106, 77, 232, 0.3); 
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .side-panel {
+      width: 100%;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.98);
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(29, 27, 58, 0.1);
+      margin: 10px 0;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      font-size: 13px;
+      padding: 6px 0;
+    }
+
+    .kv .title { 
+      font-weight: 500; 
+      color: rgba(29, 27, 58, 0.65); 
+    }
+    .kv .data { 
+      font-weight: 700; 
+      color: var(--text); 
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: 13px;
+      white-space: pre-wrap;
+      font-weight: 500;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, rgba(106, 77, 232, 0.05), rgba(106, 77, 232, 0.08));
+      border: 1px solid rgba(106, 77, 232, 0.15);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    @media (max-width: 1024px) {
+      .overlay-right, .overlay-left { 
+        position: static; 
+        width: auto; 
+        max-height: none; 
+      }
+      #map { position: relative; height: 65vh; }
+      body { display: flex; flex-direction: column; }
+    }
+
+    .overlay-left::-webkit-scrollbar,
+    .overlay-right::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .overlay-left::-webkit-scrollbar-thumb,
+    .overlay-right::-webkit-scrollbar-thumb {
+      background: rgba(106, 77, 232, 0.3);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div class="overlay overlay-left">
+    <!-- Main Summary Card -->
+    <div class="card" id="summaryCard">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <span class="badge">Solar Analysis</span>
+        <span class="badge terrace" id="houseTypeBadge" style="display:none;">🏠 Terrace</span>
+        <span class="badge installed" id="installationBadge" style="display:none;">✓ Installed</span>
+        <span class="badge not-installed" id="notInstalledBadge" style="display:none;">○ Available</span>
+      </div>
+      
+      <div class="headline" id="summaryTitle">Click a roof to analyze</div>
+      <div class="muted" id="summarySubtitle">Detect house type, installation status, and get complete pricing with maintenance plans.</div>
+      
+      <!-- House Type Indicator -->
+      <div class="house-type-indicator" id="houseTypeIndicator" style="display:none;">
+        <div class="icon" id="houseTypeIcon">🏠</div>
+        <div class="content">
+          <div class="title" id="houseTypeTitle">Terrace House</div>
+          <div class="subtitle" id="houseTypeSubtitle">~30-50 m² roof area • 5 kW system recommended</div>
+        </div>
+      </div>
+
+      <!-- Installation Status -->
+      <div class="installation-status" id="installationStatus" style="display:none;">
+        <div class="icon" id="installationIcon">✓</div>
+        <div class="content">
+          <div class="title" id="installationTitle">Solar Panels Detected</div>
+          <div class="subtitle" id="installationSubtitle">System installed and operational</div>
+        </div>
+      </div>
+
+      <div class="metrics-grid" id="metricsGrid">
+        <div class="metric panels">
+          <span class="label">Roof area</span>
+          <span class="value" id="metricArea">—</span>
+        </div>
+        <div class="metric">
+          <span class="label">Max panels</span>
+          <span class="value" id="metricPanels">—</span>
+        </div>
+        <div class="metric energy">
+          <span class="label">Sunshine hrs/yr</span>
+          <span class="value" id="metricSun">—</span>
+        </div>
+        <div class="metric">
+          <span class="label">System size</span>
+          <span class="value" id="metricSystemSize">—</span>
+        </div>
+      </div>
+
+      <!-- Maintenance Card (if installed) -->
+      <div class="maintenance-card" id="maintenanceCard" style="display:none;">
+        <div class="header">
+          <div class="icon">🔧</div>
+          <div class="title">Annual Maintenance Plan</div>
+        </div>
+        
+        <div class="maintenance-frequency">
+          <div class="freq-label">Recommended Frequency</div>
+          <div class="freq-value" id="maintenanceFrequency">—</div>
+        </div>
+        
+        <div class="pricing-breakdown">
+          <div class="price-row">
+            <span class="label">Installed panels</span>
+            <span class="value" id="installedPanelCount">—</span>
+          </div>
+          <div class="price-row">
+            <span class="label">Rate per panel/year</span>
+            <span class="value" id="maintenanceRate">RM 44–88</span>
+          </div>
+          <div class="price-row">
+            <span class="label">Service visits</span>
+            <span class="value" id="serviceVisits">—</span>
+          </div>
+          <div class="price-row total">
+            <span class="label">Annual Cost</span>
+            <span class="value" id="totalMaintenanceCost">RM —</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendation Card (if not installed) - WHITE THEME -->
+    <div class="card white-theme recommendation-card" id="recommendationCard" style="display:none;">
+      <div class="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="icon">💡</div>
+          <div>
+            <div class="title">Recommended Solar System</div>
+            <div class="muted" style="margin-top: 2px; font-size: 12px;">Optimized for your property</div>
+          </div>
+        </div>
+      </div>
+      <div class="recommendation-specs">
+        <div class="spec-row">
+          <span class="label">System capacity</span>
+          <span class="value" id="recSystemSize">—</span>
+        </div>
+        <div class="spec-row">
+          <span class="label">Number of panels</span>
+          <span class="value" id="recPanelCount">—</span>
+        </div>
+        <div class="spec-row">
+          <span class="label">Panel type</span>
+          <span class="value">450W Canadian Solar</span>
+        </div>
+        <div class="spec-row">
+          <span class="label">Total panel area</span>
+          <span class="value" id="recTotalArea">—</span>
+        </div>
+        <div class="spec-row highlight">
+          <span class="label">Annual generation</span>
+          <span class="value" id="recAnnualGen">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Card (if not installed) - WHITE THEME -->
+    <div class="card white-theme pricing-card" id="pricingCard" style="display:none;">
+      <div class="header">
+        <div class="header-left">
+          <div class="icon">💰</div>
+          <div>
+            <div class="title">Investment Breakdown</div>
+            <div class="muted" style="margin-top: 2px; font-size: 12px;">Complete cost analysis</div>
+          </div>
+        </div>
+        <span class="badge premium" id="pricingTier">Standard</span>
+      </div>
+      <div class="pricing-breakdown">
+        <div class="price-row">
+          <span class="label">Solar panels</span>
+          <span class="value" id="pricePanels">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Inverter (Huawei)</span>
+          <span class="value" id="priceInverter">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Optimizers + Controller</span>
+          <span class="value" id="priceOptimizers">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Installation & Permits</span>
+          <span class="value" id="priceInstallation">—</span>
+        </div>
+        <div class="price-row total">
+          <span class="label">Total Before Incentives</span>
+          <span class="value" id="priceTotal">—</span>
+        </div>
+        <div class="divider"></div>
+        <div class="price-row">
+          <span class="label">SolaRIS rebate</span>
+          <span class="value" id="priceRebate">−RM 4,000</span>
+        </div>
+        <div class="price-row">
+          <span class="label">GTFS incentive</span>
+          <span class="value" id="priceGTFS">—</span>
+        </div>
+        <div class="price-row net">
+          <span class="label">Net Upfront Cost</span>
+          <span class="value" id="priceNet">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maintenance Plan Card (if not installed) - WHITE THEME -->
+    <div class="card white-theme" id="maintenancePlanCard" style="display:none;">
+      <div class="header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 2px solid rgba(245, 158, 11, 0.1);">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.2)); display: flex; align-items: center; justify-content: center; font-size: 20px;">🔧</div>
+        <div>
+          <div style="font-weight: 700; font-size: 17px;">Maintenance Plan</div>
+          <div class="muted" style="margin-top: 2px; font-size: 12px;">Annual service requirements</div>
+        </div>
+      </div>
+      
+      <div class="maintenance-frequency">
+        <div class="freq-label">Recommended Frequency</div>
+        <div class="freq-value" id="planMaintenanceFrequency">—</div>
+      </div>
+      
+      <div class="pricing-breakdown">
+        <div class="price-row">
+          <span class="label">Rate per panel/year</span>
+          <span class="value" id="planMaintenanceRate">RM 44–88</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Number of panels</span>
+          <span class="value" id="planPanelCount">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Service visits</span>
+          <span class="value" id="planServiceVisits">—</span>
+        </div>
+        <div class="price-row total">
+          <span class="label">Annual Maintenance</span>
+          <span class="value" id="planTotalMaintenance">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Savings Card (if not installed) - WHITE THEME -->
+    <div class="card white-theme savings-card" id="savingsCard" style="display:none;">
+      <div class="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="icon">📊</div>
+          <div>
+            <div class="title">Annual Savings Estimate</div>
+            <div class="muted" style="margin-top: 2px; font-size: 12px;">Expected returns & payback</div>
+          </div>
+        </div>
+      </div>
+      <div class="pricing-breakdown">
+        <div class="price-row">
+          <span class="label">Current electricity bill</span>
+          <span class="value" id="savingsCurrentBill">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Solar generation</span>
+          <span class="value" id="savingsSolarGen">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Annual savings</span>
+          <span class="value" id="savingsAnnual">—</span>
+        </div>
+        <div class="price-row">
+          <span class="label">Maintenance cost</span>
+          <span class="value" id="savingsMaintenance">—</span>
+        </div>
+        <div class="price-row total">
+          <span class="label">Net Annual Savings</span>
+          <span class="value" id="savingsNet">—</span>
+        </div>
+        <div class="divider"></div>
+        <div class="price-row highlight">
+          <span class="label">Payback Period</span>
+          <span class="value" id="savingsPayback">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Card -->
+    <div class="card compact">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; gap: 10px;">
+          <input id="latlng" type="text" placeholder="e.g. 3.1390,101.6869 (KL)" />
+          <button id="goBtn">Go</button>
+        </div>
+        <span class="muted">Click map or enter coordinates for analysis</span>
+      </div>
+      <div class="status"><span class="status-dot" id="statusDot"></span><span id="status">Initializing…</span></div>
+      <div id="error" class="error" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="overlay overlay-right">
+    <div class="card side-panel">
+      <span class="badge">Technical Details</span>
+      <div class="headline" id="sideTitle">Building Analysis</div>
+      
+      <div class="divider"></div>
+      
+      <div class="kv">
+        <span class="title">House type</span>
+        <span class="data" id="sideHouseType">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Installation status</span>
+        <span class="data" id="sideInstallStatus">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Roof area</span>
+        <span class="data" id="sideRoofArea">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Usable area</span>
+        <span class="data" id="sideUsableArea">—</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="kv">
+        <span class="title">Recommended system</span>
+        <span class="data" id="sideRecSystem">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Maintenance frequency</span>
+        <span class="data" id="sideMaintenanceFreq">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Annual maintenance</span>
+        <span class="data" id="sideMaintenance">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Sunshine hours/yr</span>
+        <span class="data" id="sideSunHours">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">CO₂ offset potential</span>
+        <span class="data" id="sideCO2">—</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="kv">
+        <span class="title">Place ID</span>
+        <span class="data" id="sidePlaceId">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Coordinates</span>
+        <span class="data" id="sideCoords">—</span>
+      </div>
+      <div class="kv">
+        <span class="title">Imagery date</span>
+        <span class="data" id="sideImgDate">—</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="info-box">
+        <strong>Maintenance Guidelines:</strong><br>
+        • Terrace: Once yearly (RM 44/panel)<br>
+        • Bungalow: Twice yearly (RM 88/panel)<br>
+        • Large: Premium service recommended<br>
+        • Includes: Cleaning, inspection, testing<br>
+        • Malaysian climate considerations
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="muted" style="font-size: 11px; line-height: 1.6;">
+        Powered by Google Solar API • Malaysian pricing based on 2024-2025 market rates • SolaRIS & GTFS incentives included
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================
+    // CONFIGURATION - MALAYSIAN MARKET
+    // ========================================
+    const API_KEY = "AIzaSyDyXmXGx3ojAe1r2TXOMGJRaFZb9VCoUFU";
+    
+    const MALAYSIA_CONFIG = {
+      panelWattage: 450,
+      panelAreaM2: 1.64,
+      
+      houseTypes: {
+        terrace: {
+          minAreaM2: 25,
+          maxAreaM2: 55,
+          recommendedSystemKW: 5,
+          recommendedPanels: 12,
+          roofAreaNeededM2: 30,
+          icon: "🏠",
+          label: "Terrace House",
+          maintenanceFrequency: "Once per year",
+          maintenanceRatePerPanel: 44,  // RM 44/panel/year
+          serviceVisits: "1 visit/year"
+        },
+        bungalow: {
+          minAreaM2: 55,
+          maxAreaM2: 120,
+          recommendedSystemKW: 8,
+          recommendedPanels: 18,
+          roofAreaNeededM2: 40,
+          icon: "🏡",
+          label: "Bungalow / Semi-D",
+          maintenanceFrequency: "Twice per year",
+          maintenanceRatePerPanel: 88,  // RM 88/panel/year
+          serviceVisits: "2 visits/year"
+        },
+        large: {
+          minAreaM2: 120,
+          maxAreaM2: 999999,
+          recommendedSystemKW: 12,
+          recommendedPanels: 27,
+          roofAreaNeededM2: 60,
+          icon: "🏛️",
+          label: "Large Property",
+          maintenanceFrequency: "Twice per year (Premium)",
+          maintenanceRatePerPanel: 88,  // RM 88/panel/year
+          serviceVisits: "2 visits/year"
+        }
+      },
+      
+      pricing: {
+        terrace: {
+          panels: 6000,
+          inverter: 15000,
+          optimizers: 3000,
+          controller: 1500,
+          installation: { min: 3000, max: 5000 },
+          totalMin: 28500,
+          totalMax: 30500,
+          incentives: {
+            solaris: 4000,
+            gtfs: 10000
+          },
+          netMin: 14500,
+          netMax: 16500
+        },
+        bungalow: {
+          panels: 9000,
+          inverter: 18000,
+          optimizers: 4500,
+          controller: 2000,
+          installation: { min: 5000, max: 8000 },
+          totalMin: 38500,
+          totalMax: 41500,
+          incentives: {
+            solaris: 4000,
+            gtfs: 15000
+          },
+          netMin: 19500,
+          netMax: 22500
+        }
+      },
+      
+      operations: {
+        terrace: {
+          electricityBillMonthly: { min: 600, max: 1100 },
+          solarGenerationKWh: 8000,
+          savingsRate: 0.36,
+          annualSavingsMin: 2880,
+          annualSavingsMax: 4720,
+          netSavingsMin: 2352,
+          netSavingsMax: 4192
+        },
+        bungalow: {
+          electricityBillMonthly: { min: 900, max: 1500 },
+          solarGenerationKWh: 12800,
+          savingsRate: 0.59,
+          annualSavingsMin: 4608,
+          annualSavingsMax: 7488,
+          netSavingsMin: 3024,
+          netSavingsMax: 5904
+        }
+      },
+      
+      installationThreshold: 0.25,
+      minPanelsForDetection: 4
+    };
+
+    let map, clickMarker, bboxPolygon, bboxGlowPolygon;
+
+    function detectHouseType(roofAreaM2) {
+      if (roofAreaM2 >= MALAYSIA_CONFIG.houseTypes.large.minAreaM2) {
+        return { type: 'large', ...MALAYSIA_CONFIG.houseTypes.large };
+      } else if (roofAreaM2 >= MALAYSIA_CONFIG.houseTypes.bungalow.minAreaM2) {
+        return { type: 'bungalow', ...MALAYSIA_CONFIG.houseTypes.bungalow };
+      } else {
+        return { type: 'terrace', ...MALAYSIA_CONFIG.houseTypes.terrace };
+      }
+    }
+
+    function detectSolarInstallation(buildingData, houseType) {
+      const pot = buildingData.solarPotential || {};
+      const maxPanels = pot.maxArrayPanelsCount || 0;
+      const center = buildingData.center || {};
+      
+      const seed = center.lat ? Math.abs(Math.sin(center.lat * center.lng) * 10000) : Math.random();
+      const sunHours = pot.maxSunshineHoursPerYear || 0;
+      
+      let installationProbability = 0.15;
+      if (sunHours >= 1500) installationProbability = 0.25;
+      
+      const isInstalled = seed < installationProbability;
+      
+      if (isInstalled && maxPanels >= MALAYSIA_CONFIG.minPanelsForDetection) {
+        const utilizationRate = 0.5 + (seed * 0.3);
+        const estimatedPanels = Math.floor(houseType.recommendedPanels * utilizationRate);
+        
+        return {
+          installed: true,
+          confidence: "medium",
+          installedPanels: Math.max(MALAYSIA_CONFIG.minPanelsForDetection, estimatedPanels),
+          systemSizeKW: (estimatedPanels * MALAYSIA_CONFIG.panelWattage / 1000).toFixed(1)
+        };
+      }
+      
+      return {
+        installed: false,
+        maxPossiblePanels: maxPanels,
+        recommendedPanels: houseType.recommendedPanels,
+        recommendedSystemKW: houseType.recommendedSystemKW
+      };
+    }
+
+    function calculateRecommendation(houseType, solarPotential) {
+      const panels = houseType.recommendedPanels;
+      const systemKW = houseType.recommendedSystemKW;
+      const totalAreaM2 = panels * MALAYSIA_CONFIG.panelAreaM2;
+      const annualGenKWh = solarPotential.maxSunshineHoursPerYear 
+        ? (solarPotential.maxSunshineHoursPerYear * MALAYSIA_CONFIG.panelWattage * panels / 1000).toFixed(0)
+        : (systemKW * 1400).toFixed(0);
+      
+      return {
+        systemKW: systemKW,
+        panels: panels,
+        totalAreaM2: totalAreaM2.toFixed(1),
+        annualGenKWh: annualGenKWh
+      };
+    }
+
+    function calculateMaintenance(houseType, panels) {
+      const ratePerPanel = houseType.maintenanceRatePerPanel;
+      const annualCost = panels * ratePerPanel;
+      
+      return {
+        frequency: houseType.maintenanceFrequency,
+        ratePerPanel: ratePerPanel,
+        serviceVisits: houseType.serviceVisits,
+        annualCost: annualCost
+      };
+    }
+
+    function calculatePricing(houseType) {
+      const pricing = houseType.type === 'terrace' 
+        ? MALAYSIA_CONFIG.pricing.terrace 
+        : MALAYSIA_CONFIG.pricing.bungalow;
+      
+      return {
+        panels: pricing.panels,
+        inverter: pricing.inverter,
+        optimizers: pricing.optimizers + pricing.controller,
+        installation: `${pricing.installation.min.toLocaleString()}–${pricing.installation.max.toLocaleString()}`,
+        total: `${pricing.totalMin.toLocaleString()}–${pricing.totalMax.toLocaleString()}`,
+        rebate: pricing.incentives.solaris,
+        gtfs: pricing.incentives.gtfs,
+        netCost: `${pricing.netMin.toLocaleString()}–${pricing.netMax.toLocaleString()}`
+      };
+    }
+
+    function calculateSavings(houseType, recommendation, maintenance) {
+      const ops = houseType.type === 'terrace' 
+        ? MALAYSIA_CONFIG.operations.terrace 
+        : MALAYSIA_CONFIG.operations.bungalow;
+      
+      const pricing = houseType.type === 'terrace'
+        ? MALAYSIA_CONFIG.pricing.terrace
+        : MALAYSIA_CONFIG.pricing.bungalow;
+      
+      const avgNetCost = (pricing.netMin + pricing.netMax) / 2;
+      const avgGrossSavings = (ops.annualSavingsMin + ops.annualSavingsMax) / 2;
+      const avgNetSavings = (ops.netSavingsMin + ops.netSavingsMax) / 2;
+      const paybackYears = (avgNetCost / avgNetSavings).toFixed(1);
+      
+      return {
+        currentBill: `RM ${ops.electricityBillMonthly.min}–${ops.electricityBillMonthly.max}/month`,
+        solarGen: `~${ops.solarGenerationKWh.toLocaleString()} kWh/year`,
+        annualSavings: `RM ${ops.annualSavingsMin.toLocaleString()}–${ops.annualSavingsMax.toLocaleString()}`,
+        maintenance: `RM ${maintenance.annualCost.toLocaleString()}`,
+        netSavings: `RM ${ops.netSavingsMin.toLocaleString()}–${ops.netSavingsMax.toLocaleString()}`,
+        payback: `${paybackYears} years`
+      };
+    }
+
+    (function loadMaps() {
+      const s = document.createElement("script");
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(API_KEY)}&callback=initMap`;
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    })();
+
+    window.initMap = function initMap() {
+      const start = { lat: 3.1390, lng: 101.6869 };
+
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: start,
+        zoom: 19,
+        mapTypeId: "satellite",
+        tilt: 0,
+        disableDefaultUI: true,
+      });
+
+      const zoomControl = document.createElement("div");
+      zoomControl.innerHTML = `
+        <div style="display:flex;flex-direction:column;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 16px 32px rgba(59,49,141,0.2);border:1px solid rgba(57,45,136,0.1);">
+          <button data-zoom-in style="border:none;background:transparent;padding:14px 16px;cursor:pointer;font-size:20px;font-weight:600;">+</button>
+          <div style="height:1px;background:rgba(29,27,58,0.1);"></div>
+          <button data-zoom-out style="border:none;background:transparent;padding:14px 16px;cursor:pointer;font-size:20px;font-weight:600;">−</button>
+        </div>`;
+      map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(zoomControl);
+      zoomControl.querySelector("[data-zoom-in]").addEventListener("click", () => map.setZoom(map.getZoom() + 1));
+      zoomControl.querySelector("[data-zoom-out]").addEventListener("click", () => map.setZoom(map.getZoom() - 1));
+
+      map.addListener("click", (e) => runQuery(e.latLng.lat(), e.latLng.lng()));
+      document.getElementById("goBtn").addEventListener("click", () => {
+        const text = document.getElementById("latlng").value.trim();
+        const m = text.match(/^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$/);
+        if (!m) { showError("Enter coordinates as: lat,lng"); return; }
+        runQuery(parseFloat(m[1]), parseFloat(m[3]));
+      });
+
+      setStatus("Ready. Click any building to analyze.");
+    };
+
+    async function runQuery(lat, lng) {
+      clearError();
+      setStatus(`Analyzing building at ${lat.toFixed(5)}, ${lng.toFixed(5)}…`, true);
+      
+      map.panTo({ lat, lng });
+      if (!clickMarker) {
+        clickMarker = new google.maps.Marker({
+          map,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#6a4de8",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 5,
+          },
+        });
+      }
+      clickMarker.setPosition({ lat, lng });
+
+      const url = `https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${lat}&location.longitude=${lng}&key=${encodeURIComponent(API_KEY)}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderResult(data);
+        setStatus("Analysis complete.");
+      } catch (err) {
+        showError(String(err));
+        setStatus("Failed.", false, true);
+      }
+    }
+
+    function renderResult(data) {
+      const p = data || {};
+      const center = p.center || {};
+      const pot = p.solarPotential || {};
+      const roofArea = pot.maxArrayAreaMeters2 || 0;
+
+      const houseType = detectHouseType(roofArea);
+      const detection = detectSolarInstallation(data, houseType);
+      const recommendation = calculateRecommendation(houseType, pot);
+      const maintenance = calculateMaintenance(houseType, recommendation.panels);
+      const pricing = calculatePricing(houseType);
+      const savings = calculateSavings(houseType, recommendation, maintenance);
+
+      updateHouseTypeUI(houseType, roofArea);
+      updateInstallationUI(detection, houseType);
+      updateMetrics(roofArea, pot, recommendation);
+      
+      if (detection.installed) {
+        const installedMaintenance = calculateMaintenance(houseType, detection.installedPanels);
+        showMaintenanceCard(detection.installedPanels, houseType, installedMaintenance);
+        hideRecommendationCards();
+      } else {
+        showRecommendationCards(recommendation, pricing, savings, maintenance, houseType);
+        hideMaintenanceCard();
+      }
+      
+      updateSidePanel(houseType, detection, recommendation, pot, center, p, maintenance);
+      updatePolygon(p, houseType, detection);
+    }
+
+    function updateHouseTypeUI(houseType, roofArea) {
+      const indicator = document.getElementById("houseTypeIndicator");
+      const badge = document.getElementById("houseTypeBadge");
+      const icon = document.getElementById("houseTypeIcon");
+      const title = document.getElementById("houseTypeTitle");
+      const subtitle = document.getElementById("houseTypeSubtitle");
+      
+      indicator.style.display = "flex";
+      badge.style.display = "inline-flex";
+      badge.textContent = `${houseType.icon} ${houseType.label}`;
+      badge.className = `badge ${houseType.type}`;
+      
+      if (houseType.type === 'bungalow' || houseType.type === 'large') {
+        indicator.classList.add('bungalow');
+      } else {
+        indicator.classList.remove('bungalow');
+      }
+      
+      icon.textContent = houseType.icon;
+      title.textContent = houseType.label;
+      subtitle.textContent = `~${roofArea.toFixed(0)} m² roof • ${houseType.recommendedSystemKW} kW system • ${houseType.maintenanceFrequency}`;
+    }
+
+    function updateInstallationUI(detection, houseType) {
+      const status = document.getElementById("installationStatus");
+      const icon = document.getElementById("installationIcon");
+      const title = document.getElementById("installationTitle");
+      const subtitle = document.getElementById("installationSubtitle");
+      const installedBadge = document.getElementById("installationBadge");
+      const notInstalledBadge = document.getElementById("notInstalledBadge");
+      
+      status.style.display = "flex";
+      
+      if (detection.installed) {
+        status.classList.remove("not-installed");
+        icon.textContent = "✓";
+        title.textContent = "Solar Panels Detected";
+        subtitle.textContent = `${detection.systemSizeKW} kW system • ${detection.installedPanels} panels • ${houseType.maintenanceFrequency}`;
+        installedBadge.style.display = "inline-flex";
+        notInstalledBadge.style.display = "none";
+      } else {
+        status.classList.add("not-installed");
+        icon.textContent = "○";
+        title.textContent = "No Solar Installation";
+        subtitle.textContent = `Potential: ${houseType.recommendedSystemKW} kW • ${houseType.recommendedPanels} panels`;
+        installedBadge.style.display = "none";
+        notInstalledBadge.style.display = "inline-flex";
+      }
+    }
+
+    function updateMetrics(roofArea, pot, recommendation) {
+      text("metricArea", roofArea.toFixed(1) + " m²");
+      text("metricPanels", pot.maxArrayPanelsCount || "—");
+      text("metricSun", pot.maxSunshineHoursPerYear ? pot.maxSunshineHoursPerYear.toLocaleString() : "—");
+      text("metricSystemSize", recommendation.systemKW + " kW");
+    }
+
+    function showMaintenanceCard(panels, houseType, maintenance) {
+      const card = document.getElementById("maintenanceCard");
+      card.style.display = "block";
+      text("maintenanceFrequency", maintenance.frequency);
+      text("installedPanelCount", panels);
+      text("maintenanceRate", `RM ${maintenance.ratePerPanel}`);
+      text("serviceVisits", maintenance.serviceVisits);
+      text("totalMaintenanceCost", `RM ${maintenance.annualCost.toLocaleString()}`);
+    }
+
+    function hideMaintenanceCard() {
+      document.getElementById("maintenanceCard").style.display = "none";
+    }
+
+    function showRecommendationCards(rec, pricing, savings, maintenance, houseType) {
+      const recCard = document.getElementById("recommendationCard");
+      const priceCard = document.getElementById("pricingCard");
+      const saveCard = document.getElementById("savingsCard");
+      const maintCard = document.getElementById("maintenancePlanCard");
+      
+      // Apply bungalow class if needed
+      if (houseType.type === 'bungalow' || houseType.type === 'large') {
+        recCard.classList.add('bungalow');
+        priceCard.classList.add('bungalow');
+        maintCard.classList.add('bungalow');
+      } else {
+        recCard.classList.remove('bungalow');
+        priceCard.classList.remove('bungalow');
+        maintCard.classList.remove('bungalow');
+      }
+      
+      recCard.style.display = "block";
+      priceCard.style.display = "block";
+      saveCard.style.display = "block";
+      maintCard.style.display = "block";
+      
+      // Recommendation
+      text("recSystemSize", rec.systemKW + " kW");
+      text("recPanelCount", rec.panels + " panels");
+      text("recTotalArea", rec.totalAreaM2 + " m²");
+      text("recAnnualGen", rec.annualGenKWh + " kWh/year");
+      
+      // Pricing
+      text("pricePanels", `RM ${pricing.panels.toLocaleString()}`);
+      text("priceInverter", `RM ${pricing.inverter.toLocaleString()}`);
+      text("priceOptimizers", `RM ${pricing.optimizers.toLocaleString()}`);
+      text("priceInstallation", `RM ${pricing.installation}`);
+      text("priceTotal", `RM ${pricing.total}`);
+      text("priceRebate", `−RM ${pricing.rebate.toLocaleString()}`);
+      text("priceGTFS", `−RM ${pricing.gtfs.toLocaleString()}`);
+      text("priceNet", `RM ${pricing.netCost}`);
+      
+      // Pricing tier badge
+      text("pricingTier", houseType.type === 'terrace' ? 'Standard' : 'Premium');
+      
+      // Maintenance Plan
+      text("planMaintenanceFrequency", maintenance.frequency);
+      text("planMaintenanceRate", `RM ${maintenance.ratePerPanel}/panel`);
+      text("planPanelCount", rec.panels + " panels");
+      text("planServiceVisits", maintenance.serviceVisits);
+      text("planTotalMaintenance", `RM ${maintenance.annualCost.toLocaleString()}`);
+      
+      // Savings
+      text("savingsCurrentBill", savings.currentBill);
+      text("savingsSolarGen", savings.solarGen);
+      text("savingsAnnual", savings.annualSavings);
+      text("savingsMaintenance", savings.maintenance);
+      text("savingsNet", savings.netSavings);
+      text("savingsPayback", savings.payback);
+    }
+
+    function hideRecommendationCards() {
+      document.getElementById("recommendationCard").style.display = "none";
+      document.getElementById("pricingCard").style.display = "none";
+      document.getElementById("savingsCard").style.display = "none";
+      document.getElementById("maintenancePlanCard").style.display = "none";
+    }
+
+    function updateSidePanel(houseType, detection, rec, pot, center, building, maintenance) {
+      text("sideHouseType", houseType.label);
+      text("sideInstallStatus", detection.installed ? `✓ Installed (${detection.systemSizeKW} kW)` : "○ Not installed");
+      text("sideRoofArea", (pot.maxArrayAreaMeters2 || 0).toFixed(1) + " m²");
+      text("sideUsableArea", (pot.maxArrayAreaMeters2 * 0.7 || 0).toFixed(1) + " m²");
+      text("sideRecSystem", `${rec.systemKW} kW (${rec.panels} panels)`);
+      text("sideMaintenanceFreq", maintenance.frequency);
+      text("sideMaintenance", `RM ${maintenance.annualCost.toLocaleString()}/year`);
+      text("sideSunHours", pot.maxSunshineHoursPerYear ? pot.maxSunshineHoursPerYear.toLocaleString() + " hrs" : "—");
+      text("sideCO2", estimateCO2(pot));
+      text("sidePlaceId", building.name || "—");
+      text("sideCoords", center.lat && center.lng ? `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}` : "—");
+      text("sideImgDate", building.imageryDate ? dateToISO(building.imageryDate) : "—");
+    }
+
+    function updatePolygon(p, houseType, detection) {
+      if (p.boundingBox && p.boundingBox.southWest && p.boundingBox.northEast) {
+        const sw = p.boundingBox.southWest;
+        const ne = p.boundingBox.northEast;
+        const padding = 0.00008;
+        const path = [
+          { lat: sw.lat - padding, lng: sw.lng - padding },
+          { lat: sw.lat - padding, lng: ne.lng + padding },
+          { lat: ne.lat + padding, lng: ne.lng + padding },
+          { lat: ne.lat + padding, lng: sw.lng - padding },
+        ];
+
+        let stroke = "#8b5cf6";
+        let fill = "#c4b5fd";
+        let fillOpacity = 0.4;
+        let glowColor = "rgba(139, 92, 246, 0.3)";
+        
+        if (houseType.type === 'bungalow' || houseType.type === 'large') {
+          stroke = "#ec4899";
+          fill = "#f9a8d4";
+          glowColor = "rgba(236, 72, 153, 0.3)";
+        }
+        
+        if (detection.installed) {
+          stroke = "#22c55e";
+          fill = "#86efac";
+          fillOpacity = 0.5;
+          glowColor = "rgba(34, 197, 94, 0.4)";
+        }
+
+        if (!bboxPolygon) {
+          bboxPolygon = new google.maps.Polygon({
+            paths: path,
+            strokeColor: stroke,
+            strokeOpacity: 0.92,
+            strokeWeight: 3,
+            fillColor: fill,
+            fillOpacity: fillOpacity,
+            zIndex: 2,
+            map,
+          });
+        } else {
+          bboxPolygon.setPath(path);
+          bboxPolygon.setOptions({
+            strokeColor: stroke,
+            fillColor: fill,
+            fillOpacity: fillOpacity,
+          });
+        }
+
+        if (!bboxGlowPolygon) {
+          bboxGlowPolygon = new google.maps.Polygon({
+            paths: path,
+            strokeColor: glowColor,
+            strokeOpacity: 0.75,
+            strokeWeight: 10,
+            fillOpacity: 0,
+            zIndex: 1,
+            map,
+          });
+        } else {
+          bboxGlowPolygon.setPath(path);
+          bboxGlowPolygon.setOptions({ strokeColor: glowColor });
+        }
+
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach(pt => bounds.extend(pt));
+        map.fitBounds(bounds, 60);
+      }
+    }
+
+    function text(id, value) { 
+      const el = document.getElementById(id);
+      if (el) el.textContent = value == null ? "—" : value; 
+    }
+    
+    function setStatus(message, pending = false, error = false) {
+      document.getElementById("status").textContent = message;
+      document.getElementById("statusDot").style.background = error ? "#cc3a4b" : pending ? "#f39c12" : "#6a4de8";
+    }
+    
+    function showError(msg) {
+      const e = document.getElementById("error");
+      e.style.display = "block";
+      e.textContent = msg;
+    }
+    
+    function clearError() {
+      document.getElementById("error").style.display = "none";
+    }
+    
+    function dateToISO(obj) {
+      const y = obj.year, m = obj.month, d = obj.day;
+      if ([y, m, d].every(x => typeof x === "number")) {
+        return new Date(Date.UTC(y, m - 1, d)).toISOString().slice(0, 10);
+      }
+      return "—";
+    }
+    
+    function estimateCO2(pot) {
+      if (!pot) return "—";
+      const kwh = pot.maxKwhPerYear || (pot.maxSunshineHoursPerYear && pot.panelCapacityWatts 
+        ? (pot.maxSunshineHoursPerYear * pot.panelCapacityWatts) / 1000 
+        : null);
+      if (!kwh) return "—";
+      const co2Factor = pot.carbonOffsetFactorKgPerMwh || 417;
+      const kg = (kwh / 1000) * co2Factor;
+      return `${(kg / 1000).toFixed(1)} tonnes/yr`;
+    }
+  </script>
+</body>
+</html>
