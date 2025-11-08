@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Huawei-Hackathon-2025
 
 **QuIEP — Quantum-Intelligent Energy Platform**  
@@ -129,16 +128,4 @@ pip install -r requirements.txt
 - Wang et al., 2025: “From one-one to one-many: ORCA enables scalable and revocable group covert communication on blockchain.”
 - DNV Energy Transition Outlook 2025: P2P Trading & Smart Microgrids.
 - pvlib Documentation
-=======
 
-  # SOLARRRRRRrrr
-
-  This is a code bundle for SOLARRRRRRrrr. The original project is available at https://www.figma.com/design/sKllgCnCX9S7SQF2Gn7HNb/SOLARRRRRRrrr.
-
-  ## Running the code
-
-  Run `npm i` to install the dependencies.
-
-  Run `npm run dev` to start the development server.
-  
->>>>>>> 1ef85bc (FE)
