@@ -6,13 +6,13 @@ interface SolarExplorerProps {
   onBack?: () => void;
 }
 
-// 🇸🇬 FIXED SINGAPORE COORDINATES - Never change this!
+
 const SINGAPORE_LOCATION = { 
   lat: 1.3314,  
   lng: 103.7969 
 };
 
-// 🇸🇬 SINGAPORE Market Configuration (USD pricing)
+
 const SINGAPORE_CONFIG = {
   panelWattage: 400,
   
@@ -102,17 +102,17 @@ export function SolarExplorer({ darkMode = false, onBack }: SolarExplorerProps) 
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [analysis, setAnalysis] = useState<HouseAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
-  const clickCountRef = useRef(0);  // 🔥 使用 ref 而不是 state - 避免异步更新问题
+  const clickCountRef = useRef(0); 
   
   const API_KEY = "AIzaSyDyXmXGx3ojAe1r2TXOMGJRaFZb9VCoUFU";
   const polygonRef = useRef<google.maps.Polygon | null>(null);
   const glowPolygonRef = useRef<google.maps.Polygon | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
 
-  // 🇸🇬 NO GPS - Always use fixed Singapore location
+
   console.log('🇸🇬 SolarExplorer using FIXED Singapore location:', SINGAPORE_LOCATION);
 
-  // Initialize Map with FIXED Singapore location
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -122,7 +122,7 @@ export function SolarExplorer({ darkMode = false, onBack }: SolarExplorerProps) 
     
     script.onload = () => {
       const newMap = new google.maps.Map(mapRef.current!, {
-        center: SINGAPORE_LOCATION,  // FIXED Singapore
+        center: SINGAPORE_LOCATION, 
         zoom: 19,
         mapTypeId: 'satellite',
         tilt: 0,
@@ -131,7 +131,6 @@ export function SolarExplorer({ darkMode = false, onBack }: SolarExplorerProps) 
 
       setMap(newMap);
 
-      // 🔥 FIX: Pass newMap directly to avoid state timing issues
       newMap.addListener('click', (e: google.maps.MapMouseEvent) => {
         if (e.latLng) {
           console.log('🖱️ Map clicked at:', e.latLng.lat(), e.latLng.lng());
@@ -159,13 +158,11 @@ export function SolarExplorer({ darkMode = false, onBack }: SolarExplorerProps) 
     
     setLoading(true);
     
-    // 🔥 增加点击计数（使用 ref 立即更新）
     clickCountRef.current = clickCountRef.current + 1;
     const currentClick = clickCountRef.current;
     
     console.log('👆 Click #' + currentClick);
     
-    // Place marker
     if (!markerRef.current) {
       markerRef.current = new google.maps.Marker({
         map: mapInstance,
@@ -181,23 +178,23 @@ export function SolarExplorer({ darkMode = false, onBack }: SolarExplorerProps) 
     }
     markerRef.current.setPosition({ lat, lng });
 
-    // 🇸🇬 FIXED ORDER BY CLICK COUNT
+
     // 第1次 → Landed, 第2次 → Condo, 第3次 → HDB (循环)
     let houseType;
-    const clickIndex = ((currentClick - 1) % 3);  // 0, 1, 2
+    const clickIndex = ((currentClick - 1) % 3); 
     
     if (clickIndex === 0) {
       // 第1次 → Landed
       houseType = SINGAPORE_CONFIG.houseTypes.landed;
-      console.log('🏡 Type: Landed Property (Click #' + currentClick + ')');
+      console.log(' Type: Landed Property (Click #' + currentClick + ')');
     } else if (clickIndex === 1) {
       // 第2次 → Condo
       houseType = SINGAPORE_CONFIG.houseTypes.condo;
-      console.log('🏙️ Type: Condominium (Click #' + currentClick + ')');
+      console.log('Type: Condominium (Click #' + currentClick + ')');
     } else {
       // 第3次 → HDB
       houseType = SINGAPORE_CONFIG.houseTypes.hdb;
-      console.log('🏢 Type: HDB Flat (Click #' + currentClick + ')');
+      console.log('Type: HDB Flat (Click #' + currentClick + ')');
     }
     
     // 25% chance already installed (random)
@@ -212,7 +209,6 @@ export function SolarExplorer({ darkMode = false, onBack }: SolarExplorerProps) 
       ? Math.floor(houseType.recommendedPanels * (0.7 + (seed % 100) / 333))
       : houseType.recommendedPanels;
 
-    // Get pricing data
     const pricingKey = houseType.label.includes('HDB') 
       ? 'hdb' 
       : houseType.label.includes('Condo') 
