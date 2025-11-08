@@ -71,7 +71,7 @@ export function SolarMapPreview({ darkMode = false, onExploreClick }: SolarMapPr
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedHouse, setSelectedHouse] = useState<HouseType | null>(null);
   
-  const API_KEY = "AIzaSyDyXmXGx3ojAe1r2TXOMGJRaFZb9VCoUFU";
+  const API_KEY = " ";
   const markersRef = useRef<google.maps.Marker[]>([]);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
 
