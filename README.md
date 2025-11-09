@@ -147,13 +147,13 @@ pip install -r requirements.txt
 </a>
 
 
-[React.js]: https://react.dev/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 [Python.org]: https://www.python.org/
 [Huawei BCS]: https://www.huaweicloud.com/intl/en-us/product/bcs.html
 [ModelArts]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
 [QRNG]: https://qrng.anu.edu.au/
 [GoogleSolar]: https://developers.google.com/solar/api
-[React-url]: https://react.dev/
+[React-url]: https://reactjs.org/
 [Python-url]: https://www.python.org/
 [ModelArts-url]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
 [QRNG-url]: https://qrng.anu.edu.au/
