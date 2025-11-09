@@ -147,7 +147,7 @@ pip install -r requirements.txt
 </a>
 
 
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+[React.js]:https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [Python.org]: https://www.python.org/
 [Huawei BCS]: https://www.huaweicloud.com/intl/en-us/product/bcs.html
 [ModelArts]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
