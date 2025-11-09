@@ -133,12 +133,12 @@ pip install -r requirements.txt
 
 ### Built With
 
-* ![React][React.js] — [React.js][React-url] for the front-end UI/UX and real-time dashboard visualization  
-* ![Python][Python.org] — [Python][Python-url] for backend logic, blockchain integration, and API orchestration  
-* ![Huawei ModelArts][ModelArts] — [Huawei ModelArts][ModelArts-url] for AI model training, solar forecasting (pvlib + LightGBM), and deployment pipeline  
-* ![ANU QRNG API][QRNG] — [ANU Quantum Random Number Generator API][QRNG-url] for true quantum entropy generation in Q-ORCA blockchain  
-* ![Google Solar API][GoogleSolar] — [Google Solar API][GoogleSolar-url] for rooftop potential estimation and irradiance mapping  
-* ![Huawei BCS][BCS] — [Huawei Blockchain Service (BCS)][BCS-url] for blockchain hosting and secure smart-contract deployment  
+* ![React][React.js] — for the front-end UI/UX and real-time dashboard visualization  
+* ![Python][Python.org] — for backend logic, blockchain integration, and API orchestration  
+* ![Huawei ModelArts][ModelArts] — for AI model training, solar forecasting (pvlib + LightGBM), and deployment pipeline  
+* ![ANU QRNG API][QRNG] —  for true quantum entropy generation in Q-ORCA blockchain  
+* ![Google Solar API][GoogleSolar] —  for rooftop potential estimation and irradiance mapping  
+* ![Huawei BCS][BCS] — for blockchain hosting and secure smart-contract deployment  
 
 
 ## Contributor
@@ -148,11 +148,11 @@ pip install -r requirements.txt
 
 
 [React.js]:https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[Python.org]: https://www.python.org/
-[Huawei BCS]: https://www.huaweicloud.com/intl/en-us/product/bcs.html
-[ModelArts]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
-[QRNG]: https://qrng.anu.edu.au/
-[GoogleSolar]: https://developers.google.com/solar/api
+[Python.org]: https://img.shields.io/badge/python-8A2BE2
+[Huawei BCS]: https://img.shields.io/badge/HuaweiBCS-CC0000
+[ModelArts]: https://img.shields.io/badge/HuaweiModelArts-CC0000
+[QRNG]: https://img.shields.io/badge/ANUQRNG-1F4876
+[GoogleSolar]: https://img.shields.io/badge/GoogleSolarAPI-84A1BB
 [React-url]: https://reactjs.org/
 [Python-url]: https://www.python.org/
 [ModelArts-url]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
