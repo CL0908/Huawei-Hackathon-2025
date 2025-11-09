@@ -149,7 +149,7 @@ pip install -r requirements.txt
 
 [React.js]:https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [Python.org]: https://img.shields.io/badge/python-8A2BE2
-[Huawei BCS]: https://img.shields.io/badge/HuaweiBCS-CC0000
+[Huawei BCS]: https://img.shields.io/badge/HuaweiBCS-58E9F0
 [ModelArts]: https://img.shields.io/badge/HuaweiModelArts-CC0000
 [QRNG]: https://img.shields.io/badge/ANUQRNG-1F4876
 [GoogleSolar]: https://img.shields.io/badge/GoogleSolarAPI-84A1BB
