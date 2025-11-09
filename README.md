@@ -129,3 +129,10 @@ pip install -r requirements.txt
 - DNV Energy Transition Outlook 2025: P2P Trading & Smart Microgrids.
 - pvlib Documentation
 
+## Contributor
+<a href="https://github.com/CL0908/Huawei-Hackathon-2025/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CL0908/Huawei-Hackathon-2025" alt="contrib.rocks image" />
+</a>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
