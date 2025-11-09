@@ -138,7 +138,6 @@ pip install -r requirements.txt
 * ![Huawei ModelArts][ModelArts] — for AI model training, solar forecasting (pvlib + LightGBM), and deployment pipeline  
 * ![ANU QRNG API][QRNG] —  for true quantum entropy generation in Q-ORCA blockchain  
 * ![Google Solar API][GoogleSolar] —  for rooftop potential estimation and irradiance mapping  
-* ![HuaweiBCS][BCS] — for blockchain hosting and secure smart-contract deployment  
 
 
 ## Contributor
