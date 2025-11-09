@@ -129,10 +129,33 @@ pip install -r requirements.txt
 - DNV Energy Transition Outlook 2025: P2P Trading & Smart Microgrids.
 - pvlib Documentation
 
+## Built with
+
+### Built With
+
+* ![React][React.js] — [React.js][React-url] for the front-end UI/UX and real-time dashboard visualization  
+* ![Python][Python.org] — [Python][Python-url] for backend logic, blockchain integration, and API orchestration  
+* ![Huawei ModelArts][ModelArts] — [Huawei ModelArts][ModelArts-url] for AI model training, solar forecasting (pvlib + LightGBM), and deployment pipeline  
+* ![ANU QRNG API][QRNG] — [ANU Quantum Random Number Generator API][QRNG-url] for true quantum entropy generation in Q-ORCA blockchain  
+* ![Google Solar API][GoogleSolar] — [Google Solar API][GoogleSolar-url] for rooftop potential estimation and irradiance mapping  
+* ![Huawei BCS][BCS] — [Huawei Blockchain Service (BCS)][BCS-url] for blockchain hosting and secure smart-contract deployment  
+
+
 ## Contributor
 <a href="https://github.com/CL0908/Huawei-Hackathon-2025/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=CL0908/Huawei-Hackathon-2025" alt="contrib.rocks image" />
 </a>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+[React.js]: https://react.dev/
+[Python.org]: https://www.python.org/
+[Huawei BCS]: https://www.huaweicloud.com/intl/en-us/product/bcs.html
+[ModelArts]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
+[QRNG]: https://qrng.anu.edu.au/
+[GoogleSolar]: https://developers.google.com/solar/api
+[React-url]: https://react.dev/
+[Python-url]: https://www.python.org/
+[ModelArts-url]: https://www.huaweicloud.com/intl/en-us/product/modelarts.html
+[QRNG-url]: https://qrng.anu.edu.au/
+[GoogleSolar-url]: https://developers.google.com/solar/api
+[BCS-url]: https://www.huaweicloud.com/intl/en-us/product/bcs.html
